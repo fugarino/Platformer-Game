@@ -2,8 +2,8 @@
 const canvas = document.querySelector("canvas");
 const c = canvas.getContext("2d");
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+canvas.width = 1024;
+canvas.height = 576;
 
 // Gravity
 const gravity = 0.5;
@@ -39,30 +39,68 @@ class Player {
 }
 
 class Platform {
-  constructor({ x, y }) {
+  constructor({ x, y, image }) {
     this.position = {
       x: x,
       y: y,
     };
-    this.width = 200;
-    this.height = 20;
+    this.image = image;
+    this.width = image.width;
+    this.height = image.height;
   }
 
   draw() {
-    c.fillStyle = "blue";
-    c.fillRect(this.position.x, this.position.y, this.width, this.height);
+    c.drawImage(this.image, this.position.x, this.position.y);
   }
 }
+
+class GenericObject {
+  constructor({ x, y, image }) {
+    this.position = {
+      x: x,
+      y: y,
+    };
+    this.image = image;
+    this.width = image.width;
+    this.height = image.height;
+  }
+
+  draw() {
+    c.drawImage(this.image, this.position.x, this.position.y);
+  }
+}
+
+function createImage(imageSrc) {
+  const image = new Image();
+  image.src = imageSrc;
+  return image;
+}
+
+const platformImage = createImage("./img/platform.png");
 
 const player = new Player();
 const platforms = [
   new Platform({
-    x: 200,
-    y: 100,
+    x: -1,
+    y: 470,
+    image: platformImage,
   }),
   new Platform({
-    x: 500,
-    y: 200,
+    x: platformImage.width - 3,
+    y: 470,
+    image: platformImage,
+  }),
+];
+const genericObjects = [
+  new GenericObject({
+    x: -1,
+    y: -1,
+    image: createImage("./img/background.png"),
+  }),
+  new GenericObject({
+    x: 0,
+    y: 0,
+    image: createImage("./img/hills.png"),
   }),
 ];
 
@@ -80,11 +118,17 @@ let scrollOffset = 0;
 // Animation Loop
 function animate() {
   requestAnimationFrame(animate);
-  c.clearRect(0, 0, canvas.width, canvas.height);
-  player.update();
+  c.fillStyle = "white";
+  c.fillRect(0, 0, canvas.width, canvas.height);
+
+  genericObjects.forEach((genericObject) => {
+    genericObject.draw();
+  });
+
   platforms.forEach((platform) => {
     platform.draw();
   });
+  player.update();
 
   if (keys.right.pressed && player.position.x < 400) {
     player.velocity.x = 5;
